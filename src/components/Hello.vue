@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import Vue from 'Vue'
+import Vue from 'vue'
 import vueCookie from 'vue-cookie'
 Vue.use(vueCookie)
 

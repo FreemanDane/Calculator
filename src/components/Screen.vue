@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import Vue from 'Vue'
+import Vue from 'vue'
 import vueCookie from 'vue-cookie'
 import bus from '../assets/eventBus'
 Vue.use(vueCookie);
@@ -51,11 +51,13 @@ export default {
 			},
 			show_history: false,
 			history: history,
-			currPos: history.length
+			currPos: history.length - 1
 		}
 	},
 	mount() {
-		
+		if (history.length != 0){
+			
+		}
 	},
 	methods:{
 
