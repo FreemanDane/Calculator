@@ -93,8 +93,11 @@ export default {
 			}
 			if (eq == 'd'){
 				var c = self.curr.equation[self.curr.equation.length - 1];
-				if (c == 'n' || c == 'g'){
+				if (c == 'n' || c == 'g' || c == 's'){
 					self.curr.equation = self.curr.equation.slice(0, self.curr.equation.length - 3);
+				}
+				else if (c == 'I'){
+					self.curr.equation = self.curr.equation.slice(0, self.curr.equation.length - 2);
 				}
 				else{
 					self.curr.equation = self.curr.equation.slice(0, self.curr.equation.length - 1);
@@ -112,13 +115,17 @@ export default {
 			}
 			this.history.push(eq + '=' + String(r));
 			this.currPos = this.history.length - 1;
-			this.curr.result = String(r);
+			this.update();
 		},
 		update: function(){
 			if (this.history.length == 0)
 				return;
-			if (this.currPos == 0 && this.currPos == this.history.length - 1)
-				return;
+			while (this.currPos < 0){
+				this.currPos++;
+			}
+			while (this.currPos >= this.history.length){
+				this.currPos--;
+			}
 			var key = this.history[this.currPos].split('=');
 			var equation = key[0], result=key[1];
 			this.curr.equation = equation;

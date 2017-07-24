@@ -6,6 +6,7 @@
 			<option value="kin">亲戚</option>
 			<option value="canvas">绘图</option>
 		</select>
+		<transition name='change'>
 		<div class="normal" v-if="type=='normal'">
 			<div>
 				<button v-on:click="getInput('1')">1</button>
@@ -32,7 +33,7 @@
 				<button v-on:click="getInput('(')">(</button>
 				<button v-on:click="getInput('0')">0</button>
 				<button v-on:click="getInput(')')">)</button>
-				<button v-on:click="getInput('=')">=</button>
+				<button v-on:click="getInput('.')">.</button>
 				<button v-on:click="getInput('^')">^</button>
 			</div>
 			<div>
@@ -42,7 +43,10 @@
 				<button v-on:click="getInput('!')">!</button>
 				<button v-on:click="getInput('log')">Log</button>
 			</div>
+			<button v-on:click="getInput('PI')" id='pi'>Pi</button>
+			<button v-on:click="getInput('=')" id="equation-button">=</button>
 		</div>
+		</transition>
 		<div class="ROE" v-if="type=='ROE'">
 		</div>
 		<div class="kin" v-if="type=='kin'">
@@ -73,7 +77,7 @@ export default {
 		keyboardInput(event){
 			var key = event.key;
 			if (this.type == "normal"){
-				var direct = "1234567890!*-+/!^()";
+				var direct = "1234567890!*-+/!^().";
 				if (direct.indexOf(key) != -1){
 					this.getInput(key);
 				}
@@ -89,8 +93,14 @@ export default {
 				else if (key === 't'){
 					this.getInput('tan');
 				}
+				else if (key === 'p'){
+					this.getInput('PI');
+				}
 				else if (key === 'Backspace'){
-					this.getInput('c');
+					this.getInput('d');
+				}
+				else if (key === "Enter"){
+					this.getInput('=')
 				}
 			}
 		}
@@ -112,6 +122,30 @@ export default {
 	border-radius: 10%
 }
 
+.change-enter-active{
+	transition: all .3s ease;
+}
+.change-leave-active{
+	transition: all .8s ease;
+}
+
+.change-enter, .change-leave-to{
+  	transform: translateX(-20px);
+	opacity: 0;
+}
+
+#equation-button{
+	float:left;
+	position:relative;
+	width:250px;
+	left: 150px;
+}
+#pi{
+	float:left;
+	clear:left;
+	width:200px;
+}
+
 .normal button:hover{
 	background: brown;
 }
@@ -123,7 +157,7 @@ export default {
 }
 
 .normal{
-	height: 800px;
+	height: 1000px;
 }
 
 select{
