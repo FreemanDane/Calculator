@@ -39,11 +39,13 @@ import {calculate} from '../assets/calculator'
 Vue.use(vueCookie);
 
 let history = new Array;
+let historyType = new Array;
 for (var index = 0; index < 10; ++index){
 	var key = "history" + String(index);
 	var value = Vue.cookie.get(key);
 	if (value !== null)
 		history.push(value);
+		historyType.push(Vue.cookie.get(key+'type'));
 }
 
 export default {
