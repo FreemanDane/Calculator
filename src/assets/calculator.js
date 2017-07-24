@@ -1,4 +1,4 @@
 
-export function calculate(eq){
+export function calculate(eq, type){
 	return eval(eq);
 }

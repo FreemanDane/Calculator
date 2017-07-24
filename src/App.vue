@@ -1,16 +1,18 @@
 <template>
   <div id="app">
     <screen></screen>
+    <keyboard></keyboard>
   </div>
 </template>
 
 <script>
 import Screen from './components/Screen'
+import Keyboard from './components/Keyboard'
 
 export default {
   name: 'app',
   components: {
-    Screen
+    Screen,Keyboard
   }
 }
 </script>
