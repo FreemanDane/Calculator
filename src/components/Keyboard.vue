@@ -103,8 +103,7 @@ export default {
 	data() {
 		return{
 			type:'normal',
-			money:['CNY', 'USD', 'JPY', 'EUR', 'GBP', 'HKD', 'SUR', 'DEM', 'CHF', 'FRF', 'CAD', 'AUD', 'ATS', 'FIM', 'BEF', 'IEP', 'ITL', 'LUF', 'NLG'
-			,'PTE', 'ESP', 'IDR', 'MYR', 'NZD', 'PHP', 'SGD', 'KRW', 'THB'],
+			money:['CNY', 'USD', 'JPY', 'EUR', 'GBP', 'HKD', 'CHF', 'CAD', 'AUD', 'IDR', 'MYR', 'NZD', 'PHP', 'SGD', 'KRW', 'THB'],
 			from:'原货币',
 			to:'目标货币'
 		}
