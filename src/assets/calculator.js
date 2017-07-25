@@ -1,5 +1,5 @@
 'use strict'
-//本部分基础功能四则运算中使用PI作为圆周率pi的代表，支持的符号集为｛＋，－ ， *, /, 数字集合, PI, E, . ,sin(), cos(), tan, ()! ,log()(),()^()｝
+//本部分基础功能四则运算中使用PI作为圆周率pi的代表，E代表e，支持的符号集为｛＋，－ ， *, /, 数字集合, PI, E, . ,sin(), cos(), tan(), ()! ,log()(),()^(),log(),num!,num^(),()^num,num^num｝
 function isAdvancedBadWord(str)
 {
 	let len = str.length;
