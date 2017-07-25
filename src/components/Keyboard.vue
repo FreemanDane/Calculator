@@ -43,8 +43,11 @@
 				<button v-on:click="getInput('!')">!</button>
 				<button v-on:click="getInput('log')">Log</button>
 			</div>
-			<button v-on:click="getInput('PI')" id='pi'>Pi</button>
-			<button v-on:click="getInput('=')" id="equation-button">=</button>
+			<div>
+				<button v-on:click="getInput('PI')" class="const">Pi</button>
+				<button v-on:click="getInput('E')" class="const">e</button>
+				<button v-on:click="getInput('=')" id="equation-button">=</button>
+			</div>
 		</div>
 		</transition>
 		<transition name="change">
@@ -58,24 +61,25 @@
 				<option v-for="m in money" :key='m'>{{m}}</option>
 			</select>
 			<div>
-				<button>1</button>
-				<button>2</button>
-				<button>3</button>
+				<button v-on:click="getInput('1')">1</button>
+				<button v-on:click="getInput('2')">2</button>
+				<button v-on:click="getInput('3')">3</button>
 			</div>
 			<div>
-				<button>4</button>
-				<button>5</button>
-				<button>6</button>
+				<button v-on:click="getInput('4')">4</button>
+				<button v-on:click="getInput('5')">5</button>
+				<button v-on:click="getInput('6')">6</button>
 			</div>
 			<div>
-				<button>7</button>
-				<button>8</button>
-				<button>9</button>
+				<button v-on:click="getInput('7')">7</button>
+				<button v-on:click="getInput('8')">8</button>
+				<button v-on:click="getInput('9')">9</button>
 			</div>
 			<div class="ROE-special">
-				<button>回退</button>
-				<button>0</button>
-				<button>.</button>
+				<button v-on:click="getInput('d')">回退</button>
+				<button v-on:click="getInput('0')">0</button>
+				<button v-on:click="getInput('.')">.</button>
+				<button v-on:click="getInput('=')">=</button>
 			</div>
 		</div>
 		</transition>
@@ -99,7 +103,7 @@ export default {
 	data() {
 		return{
 			type:'normal',
-			money:['RMB', 'USD', 'JPY', 'EUR', 'GBP', 'HKD', 'SUR', 'DEM', 'CHF', 'FRF', 'CAD', 'AUD', 'ATS', 'FIM', 'BEF', 'IEP', 'ITL', 'LUF', 'NLG'
+			money:['CNY', 'USD', 'JPY', 'EUR', 'GBP', 'HKD', 'SUR', 'DEM', 'CHF', 'FRF', 'CAD', 'AUD', 'ATS', 'FIM', 'BEF', 'IEP', 'ITL', 'LUF', 'NLG'
 			,'PTE', 'ESP', 'IDR', 'MYR', 'NZD', 'PHP', 'SGD', 'KRW', 'THB'],
 			from:'原货币',
 			to:'目标货币'
@@ -107,14 +111,19 @@ export default {
 	},
 	mounted() {
 		window.addEventListener('keydown', this.keyboardInput);
-		var self = this;
+		let self = this;
 		bus.$on("change",function(type){
 			self.type = type;
 		})
 	},
 	methods:{
 		getInput:function(str){
-			bus.$emit('newInput', str, self.type)
+			if (this.type == 'normal'){
+				bus.$emit('newInput', str, this.type)
+			}
+			else if (this.type == 'ROE'){
+				bus.$emit('newInput', str + ' ' + this.from + '>' + this.to, this.type)
+			}
 		},
 		keyboardInput(event){
 			var key = event.key;
@@ -138,14 +147,30 @@ export default {
 				else if (key === 'p'){
 					this.getInput('PI');
 				}
+				else if (key === 'e'){
+					this.getInput('E')
+				}
 				else if (key === 'Backspace'){
 					this.getInput('d');
 				}
 				else if (key === "Enter"){
-					this.getInput('=')
+					event.preventDefault();
+					this.getInput('=');
 				}
 			}
 		}
+	},
+	watch: {
+		from: function(val){
+			if (this.to.indexOf("货币") == -1){
+				bus.$emit("updateRate", this.from, this.to)
+			}
+		}, 
+		to: function(val){
+			if (this.from.indexOf("货币") == -1){
+				bus.$emit("updateRate", this.from, this.to)
+			}
+		} 
 	}
 }
 </script>
@@ -165,13 +190,16 @@ export default {
 	margin: 20px;
 }
 
+.ROE{
+	text-align: left;
+}
+
 .ROE button{
-	top: 50px;
-	left:-150px;
+	margin-left: 20px
 }
 
 .ROE-special button{
-	left: 25px;
+	left: 430px;
 }
 
 .change-enter-active{
@@ -192,10 +220,8 @@ export default {
 	width:250px;
 	left: 150px;
 }
-#pi{
+.const{
 	float:left;
-	clear:left;
-	width:200px;
 }
 
 .normal button:hover, .ROE button:hover{

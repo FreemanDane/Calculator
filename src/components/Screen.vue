@@ -36,6 +36,8 @@ import Vue from 'vue'
 import vueCookie from 'vue-cookie'
 import bus from '../assets/eventBus'
 import {calculate} from '../assets/calculator'
+import {getRate} from '../assets/roe.js'
+
 Vue.use(vueCookie);
 
 let history = new Array;
@@ -43,11 +45,11 @@ let historyType = new Array;
 for (var index = 0; index < 10; ++index){
 	var key = "history" + String(index);
 	var value = Vue.cookie.get(key);
-	if (value !== null)
+	if (value !== null){
 		history.push(value);
 		historyType.push(Vue.cookie.get(key+'type'));
+	}
 }
-
 export default {
 	name: "screen",
 	data() {
@@ -66,7 +68,9 @@ export default {
 			},
 			show_history: false,
 			history: history,
-			currPos: history.length - 1
+			historyType: historyType, 
+			currPos: history.length - 1,
+			roeRate:0
 		}
 	},
 	mounted() {
@@ -82,40 +86,89 @@ export default {
 			this.prev.equation = equation;
 			this.prev.result = result;
 		}
-		var self = this;
+		let self = this;
 		bus.$on('newInput', function(eq, type){
-			if (eq == '='){
-				self.getResult(self.curr.equation, type);
-				return;
-			}
-			if (eq == 'c'){
-				self.curr.equation = "";
-				self.curr.result = "";
-				return;
-			}
-			if (eq == 'd'){
-				var c = self.curr.equation[self.curr.equation.length - 1];
-				if (c == 'n' || c == 'g' || c == 's'){
-					self.curr.equation = self.curr.equation.slice(0, self.curr.equation.length - 3);
+			if (type == 'normal'){
+				if (eq == '='){
+					self.getResult(self.curr.equation, type);
+					return;
 				}
-				else if (c == 'I'){
-					self.curr.equation = self.curr.equation.slice(0, self.curr.equation.length - 2);
+				if (eq == 'c'){
+					self.curr.equation = "";
+					self.curr.result = "";
+					return;
 				}
-				else{
-					self.curr.equation = self.curr.equation.slice(0, self.curr.equation.length - 1);
+				if (eq == 'd'){
+					var c = self.curr.equation[self.curr.equation.length - 1];
+					if (c == 'n' || c == 'g' || c == 's'){
+						self.curr.equation = self.curr.equation.slice(0, self.curr.equation.length - 3);
+					}
+					else if (c == 'I'){
+						self.curr.equation = self.curr.equation.slice(0, self.curr.equation.length - 2);
+					}
+					else{
+						self.curr.equation = self.curr.equation.slice(0, self.curr.equation.length - 1);
+					}
+					self.curr.result = ""
+					return;
 				}
-				return
+				self.curr.equation += eq;
 			}
-			self.curr.equation += eq;
+			else if (type == "ROE"){
+				let c = eq.split(' ')[0]
+				let marks = eq.split(' ')[1].split('>')
+				let num = '1234567890.'
+				if (eq.indexOf('货币') != -1){
+					self.curr.equation = "";
+					self.curr.result = "请选择货币种类";
+					return;
+				}
+				else if (self.curr.result = "请选择货币种类"){
+					self.curr.result = "";
+				}
+				if (c == 'd'){
+					if (self.curr.equation != "")
+						self.curr.equation = self.curr.equation.slice(0, self.curr.equation.length - 4) + marks[0]
+					self.curr.result = ""
+				}
+				else if (c == '='){
+					self.getResult(eq, type)
+				}
+				else if (num.indexOf(c) != -1){
+					if (self.curr.equation != "")
+						self.curr.equation = self.curr.equation.slice(0, self.curr.equation.length - 3) + c + marks[0]
+					else
+						self.curr.equation = c + marks[0];
+				}
+			}
+		});
+		bus.$on('updateRate', function(from, to){
+			getRate(from, to);
+		});
+		bus.$on('newRate', function(result){
+			self.roeRate = Number(result);
 		})
 	},
 	methods:{
-		getResult: function(eq){
-			var r = calculate(eq);
-			if (this.history.length == 10){
+		getResult: function(eq, type){
+			let r = ''
+			if (type == 'normal'){
+				r = calculate(eq);
+				this.history.push(eq + '=' + String(r));
+			}
+			else if (type == 'ROE'){
+				let mark = eq.split(' ')[1].split('>')
+				let v = Number(this.curr.equation.slice(0, this.curr.equation.length - 3));
+				r = String(v * this.roeRate) + mark[1];
+				this.history.push(String(v) + mark[0] + '=' + String(r));
+			}
+			this.historyType.push(type);
+			while (this.history.length >= 10){
 				this.history.shift();
 			}
-			this.history.push(eq + '=' + String(r));
+			while (this.historyType.length >= 10){
+				this.historyType.shift();
+			}
 			this.currPos = this.history.length - 1;
 			this.update();
 		},
@@ -132,6 +185,7 @@ export default {
 			var equation = key[0], result=key[1];
 			this.curr.equation = equation;
 			this.curr.result = result;
+			bus.$emit("change", this.historyType[this.currPos]);
 			if (this.currPos < this.history.length - 1){
 				var key = this.history[this.currPos + 1].split('=');
 				var equation = key[0], result=key[1];
@@ -154,6 +208,7 @@ export default {
 			}
 			for (var index = 0; index < this.history.length; ++index){
 				Vue.cookie.set('history'+String(index), this.history[index]);
+				Vue.cookie.set('history'+String(index) + 'type', this.historyType[index]);
 			}
 		}
 	}
