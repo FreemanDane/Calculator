@@ -44,9 +44,10 @@
 				<button v-on:click="getInput('log')">Log</button>
 			</div>
 			<div>
-				<button v-on:click="getInput('PI')" class="const">Pi</button>
-				<button v-on:click="getInput('E')" class="const">e</button>
-				<button v-on:click="getInput('=')" id="equation-button">=</button>
+				<button v-on:click="getInput('PI')">Pi</button>
+				<button v-on:click="getInput('E')">e</button>
+				<button v-on:click="getInput('x')">x</button>
+				<button v-on:click="getInput('=')">=</button>
 			</div>
 		</div>
 		</transition>
@@ -85,10 +86,36 @@
 		</transition>
 		<transition name="change">
 		<div class="kin" v-if="type=='kin'">
+			<select v-model="sex" id="sex">
+				<option disabled>请选择性别</option>
+				<option value="male">男</option>
+				<option value="female">女</option>
+			</select>
+			<div>
+				<button>爸爸</button>
+				<button>妈妈</button>
+			</div>
+			<div>
+				<button>丈夫</button>
+				<button>妻子</button>
+			</div>
+			<div class="special">
+				<button>哥哥</button>
+				<button>弟弟</button>
+			</div>
+			<div class="special">
+				<button>儿子</button>
+				<button>女儿</button>
+			</div>
+			<div class="special">
+				<button>回退</button>
+				<button>计算</button>
+			</div>
 		</div>
 		</transition>
 		<transition name="change">
 		<div class="canvas" v-if="type=='canvas'">
+			<canvas id="func" width="1000" height="200">Your browzer doesn't support canvas</canvas>
 		</div>
 		</transition>
 	</div>
@@ -96,7 +123,7 @@
 
 <script>
 import bus from '../assets/eventBus'
-import axios from 'axios'
+import {render} from '../assets/funcRender'
 
 export default {
 	name:"keyboard",
@@ -105,7 +132,8 @@ export default {
 			type:'normal',
 			money:['CNY', 'USD', 'JPY', 'EUR', 'GBP', 'HKD', 'CHF', 'CAD', 'AUD', 'IDR', 'MYR', 'NZD', 'PHP', 'SGD', 'KRW', 'THB'],
 			from:'原货币',
-			to:'目标货币'
+			to:'目标货币',
+			sex:'请选择性别'
 		}
 	},
 	mounted() {
@@ -127,7 +155,7 @@ export default {
 		keyboardInput(event){
 			var key = event.key;
 			if (this.type == "normal"){
-				var direct = "1234567890!*-+/!^().";
+				var direct = "1234567890!*-+/!^().=";
 				if (direct.indexOf(key) != -1){
 					this.getInput(key);
 				}
@@ -157,9 +185,27 @@ export default {
 					this.getInput('=');
 				}
 			}
+			if (this.type == 'ROE'){
+				let direct = "1234567890.="
+				if (direct.indexOf(key) != -1){
+					this.getInput(key);
+				}
+				else if (key === 'Backspace'){
+					this.getInput('d');
+				}
+				else if (key === "Enter"){
+					event.preventDefault();
+					this.getInput('=');
+				}
+			}
 		}
 	},
 	watch: {
+		type: function(val){
+			if (val == "canvas"){
+				setTimeout(()=>render("log(x)"), 1000);
+			}
+		},
 		from: function(val){
 			if (this.to.indexOf("货币") == -1){
 				bus.$emit("updateRate", this.from, this.to)
@@ -175,7 +221,7 @@ export default {
 </script>
 
 <style scoped>
-.normal button, .ROE button{
+.normal button, .ROE button, .kin button{
 	width: 100px;
 	height: 70px;
 	font-size: 20px;
@@ -189,12 +235,30 @@ export default {
 	margin: 20px;
 }
 
-.ROE{
+#sex{
+	position: relative;
+	top: 200px;
+}
+
+canvas{
+	width:1000px;
+	height:200px;
+	border:5px #f0f0f0 solid;
+	float: left;
+	clear: left;
+	position: relative;
+	top: 100px;
+}
+.ROE, .kin{
 	text-align: left;
 }
 
 .ROE button{
 	margin-left: 20px
+}
+
+.special button{
+	left: 430px;
 }
 
 .ROE-special button{
@@ -212,19 +276,12 @@ export default {
   	transform: translateX(-20px);
 	opacity: 0;
 }
-
-#equation-button{
-	float:left;
-	position:relative;
-	width:250px;
-	left: 150px;
-}
-.const{
-	float:left;
-}
-
-.normal button:hover, .ROE button:hover{
+button:hover{
 	background: brown;
+}
+
+button:disabled{
+	background: gray;
 }
 
 .normal div{

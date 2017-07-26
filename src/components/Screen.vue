@@ -127,8 +127,12 @@ export default {
 					self.curr.result = "";
 				}
 				if (c == 'd'){
-					if (self.curr.equation != "")
-						self.curr.equation = self.curr.equation.slice(0, self.curr.equation.length - 4) + marks[0]
+					if (self.curr.equation.length == 4){
+						self.curr.equation = "";
+					}
+					if (self.curr.equation != ""){
+						self.curr.equation = self.curr.equation.slice(0, self.curr.equation.length - 4) + marks[0];
+					}
 					self.curr.result = ""
 				}
 				else if (c == '='){
