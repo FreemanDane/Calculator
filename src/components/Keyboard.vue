@@ -1,10 +1,10 @@
 <template>
 	<div id="keyboard">
 		<select v-model="type">
-			<option value="normal">标准</option>
-			<option value="ROE">汇率</option>
-			<option value="kin">亲戚</option>
-			<option value="canvas">绘图</option>
+			<option value="normal" v-on:click="$bus.emit('clear')">标准</option>
+			<option value="ROE" v-on:click="$bus.emit('clear')">汇率</option>
+			<option value="kin" v-on:click="$bus.emit('clear')">亲戚</option>
+			<option value="canvas" v-on:click="$bus.emit('clear')">绘图</option>
 		</select>
 		<transition name='change'>
 		<div class="normal" v-if="type=='normal'">
@@ -92,24 +92,28 @@
 				<option value="female">女</option>
 			</select>
 			<div>
-				<button>爸爸</button>
-				<button>妈妈</button>
+				<button v-on:click="getInput('爸爸')" v-bind:disabled="!hasFamilyMembers.father">爸爸</button>
+				<button v-on:click="getInput('妈妈')" v-bind:disabled="!hasFamilyMembers.mother">妈妈</button>
 			</div>
 			<div>
-				<button>丈夫</button>
-				<button>妻子</button>
+				<button v-on:click="getInput('老公')"  v-bind:disabled="!hasFamilyMembers.husband">丈夫</button>
+				<button v-on:click="getInput('老婆')"  v-bind:disabled="!hasFamilyMembers.wife">妻子</button>
 			</div>
 			<div class="special">
-				<button>哥哥</button>
-				<button>弟弟</button>
+				<button v-on:click="getInput('哥哥')"  v-bind:disabled="!hasFamilyMembers.elderBrother">哥哥</button>
+				<button v-on:click="getInput('弟弟')"  v-bind:disabled="!hasFamilyMembers.youngerBrother">弟弟</button>
 			</div>
 			<div class="special">
-				<button>儿子</button>
-				<button>女儿</button>
+				<button v-on:click="getInput('姐姐')"  v-bind:disabled="!hasFamilyMembers.elderSister">姐姐</button>
+				<button v-on:click="getInput('妹妹')"  v-bind:disabled="!hasFamilyMembers.youngerSister">妹妹</button>
 			</div>
 			<div class="special">
-				<button>回退</button>
-				<button>计算</button>
+				<button v-on:click="getInput('儿子')"  v-bind:disabled="!hasFamilyMembers.son">儿子</button>
+				<button v-on:click="getInput('女儿')"  v-bind:disabled="!hasFamilyMembers.daughter">女儿</button>
+			</div>
+			<div class="special">
+				<button v-on:click="getInput('d')">回退</button>
+				<button v-on:click="getInput('=')">计算</button>
 			</div>
 		</div>
 		</transition>
@@ -133,14 +137,33 @@ export default {
 			money:['CNY', 'USD', 'JPY', 'EUR', 'GBP', 'HKD', 'CHF', 'CAD', 'AUD', 'IDR', 'MYR', 'NZD', 'PHP', 'SGD', 'KRW', 'THB'],
 			from:'原货币',
 			to:'目标货币',
-			sex:'请选择性别'
+			sex:'请选择性别',
+			hasFamilyMembers:{
+				father:false,
+				mother:false,
+				elderBrother:false,
+				youngerBrother:false,
+				elderSister:false,
+				youngerSister:false,
+				husband:false,
+				wife:false,
+				son:false,
+				daughter:false
+			}
 		}
 	},
 	mounted() {
 		window.addEventListener('keydown', this.keyboardInput);
 		let self = this;
 		bus.$on("change",function(type){
-			self.type = type;
+			self.type = type;	
+		})
+		bus.$on("render", function(eq){
+			self.type = "canvas";
+			setTimeout(()=>render(eq), 1000);
+		})
+		bus.$on("kinbutton", function(name, value){
+			self.hasFamilyMembers[name] = value;
 		})
 	},
 	methods:{
@@ -150,6 +173,9 @@ export default {
 			}
 			else if (this.type == 'ROE'){
 				bus.$emit('newInput', str + ' ' + this.from + '>' + this.to, this.type)
+			}
+			else if (this.type == 'kin'){
+				bus.$emit('kinInput', str, this.sex);
 			}
 		},
 		keyboardInput(event){
@@ -201,11 +227,6 @@ export default {
 		}
 	},
 	watch: {
-		type: function(val){
-			if (val == "canvas"){
-				setTimeout(()=>render("log(x)"), 1000);
-			}
-		},
 		from: function(val){
 			if (this.to.indexOf("货币") == -1){
 				bus.$emit("updateRate", this.from, this.to)
@@ -215,7 +236,12 @@ export default {
 			if (this.from.indexOf("货币") == -1){
 				bus.$emit("updateRate", this.from, this.to)
 			}
-		} 
+		},
+		sex: function(val){
+			if (this.type == "kin"){
+				bus.$emit("kinInput", "", this.sex);
+			}
+		},
 	}
 }
 </script>

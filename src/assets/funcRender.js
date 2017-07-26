@@ -14,32 +14,43 @@ export function render(eq){
     while (cx < 10){
         let e = eq;
         while (e.indexOf('x') != -1){
-            e = e.replace(/x/, String(cx));
+            e = e.replace(/x/, '(' + String(cx) + ')');
         }
         let a = Number(calculate(e));
         if (a === false){
+            cx += dx;
             continue;
         }
         let result = Math.abs(a);
+        if (result > 1000){
+            cx += dx;
+            continue;
+        }
         if (result > max){
             max = result;
         }
         cx += dx;
     }
     max++;
-    system(5 * max, max, ctx);
-    console.log(111)
-    for (let cx = -5 * max; cx < 5 * max; cx += max / 100){
+    let x_max = 0;
+    if (max < 6)
+        x_max = max * 5;
+    else 
+        x_max = 30;
+        system(x_max, max, ctx);
+    
+    for (let cx = -x_max; cx < x_max; cx += x_max / 1000){
         let e = eq;
         while (e.indexOf('x') != -1){
-            e = e.replace(/x/, String(cx));
+            e = e.replace(/x/, '(' + String(cx) + ')');
         }
         let cy = calculate(e);
-        console.log(cy);
+        if (cy > 1000)
+            continue;
         if (cy === false){
             continue;
         }
-        pts.push(coordinateChange(cx / (5 * max) * 500, cy / max * 100));
+        pts.push(coordinateChange(cx / x_max * 500, cy / max * 100));
     }
     points(pts, ctx);
 }
@@ -73,8 +84,15 @@ function system(max_x, max_y, ctx){
 function points(pts, ctx){
     ctx.beginPath();
     ctx.moveTo(pts[0][0], pts[0][1]);
+    let last = pts[0][1]
     for (let p of pts){
-        ctx.lineTo(p[0], p[1]);
+        if (Math.abs(p[1] - last) < 100){
+            ctx.lineTo(p[0], p[1]);
+        }
+        else{
+            ctx.moveTo(p[0], p[1]);
+        }
+        last = p[1];
     }
     ctx.stroke();
 }

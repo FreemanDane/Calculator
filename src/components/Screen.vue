@@ -37,6 +37,7 @@ import vueCookie from 'vue-cookie'
 import bus from '../assets/eventBus'
 import {calculate} from '../assets/calculator'
 import {getRate} from '../assets/roe.js'
+import {kinRelation} from '../assets/kin'
 
 Vue.use(vueCookie);
 
@@ -152,13 +153,85 @@ export default {
 		bus.$on('newRate', function(result){
 			self.roeRate = Number(result);
 		})
+		bus.$on('clear', function(){
+			self.curr.equation = "";
+			self.curr.result = "";
+		})
+		bus.$on('kinInput', function(str, sex){
+			let familyMember={
+				father:"爸爸",
+				mother:"妈妈",
+				elderBrother:"哥哥",
+				youngerBrother:"弟弟",
+				elderSister:"姐姐",
+				youngerSister:"妹妹",
+				husband:"老公",
+				wife:"老婆",
+				son:"儿子",
+				daughter:"女儿"
+			};
+			if (str == '='){
+				let list = kinRelation(self.curr.equation, sex == 'male'? 1 : 0);
+				for ( let l of list){
+					self.curr.result += (' ' + l);
+				}
+				self.history.push(self.curr.equation + '=' + self.curr.result);
+				self.historyType.push('kin');
+				while (self.history.length >= 10){
+					self.history.shift();
+				}
+				while (self.historyType.length >= 10){
+					self.historyType.shift();
+				}
+				self.currPos = self.history.length - 1;
+				self.update();
+			}
+			else if (str == 'd'){
+				if (self.curr.equation.length > 3){
+					self.curr.equation = self.curr.equation.slice(0, self.curr.equation.length - 3);
+				}
+				else{
+					self.curr.equation = 0;
+				}
+				self.curr.result = "";
+			}
+			else{
+				if (self.curr.equation == ''){
+					self.curr.equation = str;
+				}
+				else{
+					self.curr.equation += ('的' + str);
+				}
+			}
+			if (str != '='){
+				let keys = Object.keys(familyMember);
+				for (let k of keys){
+					let eq = "";
+					if (self.curr.equation == ""){
+						eq = familyMember[k];
+					}
+					else{
+						eq = self.curr.equation + "的" + familyMember[k];
+					}
+					let r = kinRelation(eq, sex == "male"? 1 : 0);
+					bus.$emit('kinbutton', k, r.length != 0)
+				}
+			}
+		})
 	},
 	methods:{
 		getResult: function(eq, type){
 			let r = ''
 			if (type == 'normal'){
-				r = calculate(eq);
-				this.history.push(eq + '=' + String(r));
+				if (eq.indexOf('x') == -1){
+					r = calculate(eq);
+					this.history.push(eq + '=' + String(r));
+				}
+				else{
+					this.curr.result = 'y=' + this.curr.equation;
+					bus.$emit("render", eq);
+					return;
+				}
 			}
 			else if (type == 'ROE'){
 				let mark = eq.split(' ')[1].split('>')
