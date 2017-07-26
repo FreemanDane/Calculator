@@ -933,7 +933,7 @@ function selector2id(selector,sex){
     var result = [];
     var hash = {};
     var sex2 = -1;
-    if(sex<0){  //如果自己的性别不确定
+    if(sex<0){
         if(selector.indexOf(',w')==0){
             sex = 1;
         }else if(selector.indexOf(',h')==0){
@@ -943,7 +943,7 @@ function selector2id(selector,sex){
     if(sex>-1){
         selector = ','+sex+selector;
     }
-    if(selector.match(/,[w0],w|,[h1],h/)){  //同志关系去除
+    if(selector.match(/,[w0],w|,[h1],h/)){
         return false;
     }
     var getId = function(selector){
@@ -955,7 +955,6 @@ function selector2id(selector,sex){
                 s = selector;
                 for(var i in _filter){
                     var item = _filter[i];
-                    // console.log('filter#',item['exp'],selector);
                     selector = selector.replace(item['exp'],item['str']);
                     if(selector.indexOf('#')>-1){
                         var arr = selector.split('#');
@@ -968,10 +967,10 @@ function selector2id(selector,sex){
                 }
             }while(s!=selector);
             if(status){
-                if(selector.match(/,[w0],w|,[h1],h/)){  //同志关系去除
+                if(selector.match(/,[w0],w|,[h1],h/)){
                     return false;
                 }
-                selector = selector.replace(/,[01]/,'').substr(1);  //去前面逗号和性别信息
+                selector = selector.replace(/,[01]/,'').substr(1);
                 result.push(selector);
             }
         }
@@ -981,6 +980,7 @@ function selector2id(selector,sex){
 }
 
 function getDataById(id){
+
     var items = [];
     var filter = /&[olx]/g;  //忽略属性
     var getData = function(d){
@@ -994,6 +994,41 @@ function getDataById(id){
     };
     if(_data[id]){  //直接匹配称呼
         items.push(_data[id][0]);
+    }else{
+        items = getData(id);
+        if(!items.length){  //忽略年龄条件查找
+            id = id.replace(/&[ol]/g,'');
+            items = getData(id);
+        }
+        if(!items.length){  //忽略年龄条件查找
+            id = id.replace(/[ol]/g,'x');
+            items = getData(id);
+        }
+        if(!items.length){  //缩小访问查找
+            var l = id.replace(/x/g,'l');
+            items = getData(l);
+            var o = id.replace(/x/g,'o');
+            items = items.concat(getData(o));
+        }
+    }
+    return items;
+}
+
+function getAllDataById(id){
+
+    var items = [];
+    var filter = /&[olx]/g;  //忽略属性
+    var getData = function(d){
+        var res = [];
+        for(var i in _data){
+            if(i.replace(filter,'')==d){
+                res.push(_data[i]);
+            }
+        }
+        return res;
+    };
+    if(_data[id]){  //直接匹配称呼
+        items.push(_data[id]);
     }else{
         items = getData(id);
         if(!items.length){  //忽略年龄条件查找
@@ -1065,45 +1100,43 @@ function relationshipWorkout(parameter){
     var options = {
         text:'',
         sex:-1,
-        type:'default',     //为'chain'时,reverse无效
+        type:'default',
         reverse:false
     };
     for (var p in parameter) {
         options[p] = parameter[p];
     }
     var selectors = getSelectors(options.text);
-    var result = [];                            //匹配结果
-    for(var i = 0;i<selectors.length;i++){      //遍历所有可能性
+    var allResult = [];
+    for(var i = 0;i<selectors.length;i++){
         var ids = selector2id(selectors[i],options.sex);
-        // console.log('ids#',ids);
         for(var j=0;j<ids.length;j++){
             var id = ids[j];
-            if(options.type=='chain'){
-                var item = getChainById(id);
-                if(item){
-                    result.push(item);
-                }
-            }else{
-                if(options.reverse){
-                    id = reverseId(id,options.sex);
-                }
-                var items = getDataById(id);
+            var items = getDataById(id);
+            var allItems = getAllDataById(id);
+            if(items.length){
+                allResult = allResult.concat(allItems);
+            }else if(id.indexOf('w')==0||id.indexOf('h')==0){
+                items = getDataById(id.substr(2));
+                allItems = getAllDataById(id.substr(2));
                 if(items.length){
-                    result = result.concat(items);
-                }else if(id.indexOf('w')==0||id.indexOf('h')==0){  //找不到关系，随爱人叫
-                    items = getDataById(id.substr(2));
-                    if(items.length){
-                        result = result.concat(items);
-                    }
+                    allResult = allResult.concat(allItems);
                 }
             }
         }
     }
-    return unique(result);
+    var finalAllResult = [];
+    for(var i = 0; i < allResult.length; i++)
+    {
+        var tempResult = unique(allResult[i]);
+        finalAllResult.push(tempResult);
+    }
+    return finalAllResult;
 }
 
 //女:0,男:1 || str包括:'爸爸','妈妈','老公','老婆','儿子','女儿','哥哥','弟弟','姐姐','妹妹','的'
-export function kinRelation(str,sx)
+//返回值为一个数组的数组。每一个数组代表一种可能的关系，其中第一个为标准称呼，后面的是各地方言。
+export function kinRelation(str,sx = 1)
 {
     var query = {
         text:str,
