@@ -615,6 +615,7 @@ function isAdvancedLegal(str)
 		tempdata = tempdata.replace('PI','@');
 		tempdata = tempdata.replace('sin','#');
 		tempdata = tempdata.replace('cos', ':');
+		tempdata = tempdata.replace('tan', '?');
 		tempdata = tempdata.replace('log', ';');
 		tempdata = tempdata.replace('E', '$');
 		if(tempdata == data)
@@ -631,6 +632,7 @@ function isAdvancedLegal(str)
 		tempdata = tempdata.replace('{', '(');
 		tempdata = tempdata.replace('}', ')');
 		tempdata = tempdata.replace('#','Math.sin');
+		tempdata = tempdata.replace('?','Math.tan');
 		tempdata = tempdata.replace(':', 'Math.cos');
 		tempdata = tempdata.replace(';', 'Math.log');
 		if(tempdata == data)
