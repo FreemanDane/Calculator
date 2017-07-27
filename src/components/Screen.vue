@@ -45,10 +45,10 @@ let history = new Array;
 let historyType = new Array;
 for (var index = 0; index < 10; ++index){
 	var key = "history" + String(index);
-	var value = Vue.cookie.get(key);
+	var value = window.localStorage.getItem(key);
 	if (value !== null){
 		history.push(value);
-		historyType.push(Vue.cookie.get(key+'type'));
+		historyType.push(window.localStorage.getItem(key+'type'));
 	}
 }
 export default {
@@ -216,6 +216,7 @@ export default {
 					let r = kinRelation(eq, sex == "male"? 1 : 0);
 					bus.$emit('kinbutton', k, r.length != 0)
 				}
+				self.curr.result = "";
 			}
 		})
 	},
@@ -284,8 +285,8 @@ export default {
 				this.prev.result = '';
 			}
 			for (var index = 0; index < this.history.length; ++index){
-				Vue.cookie.set('history'+String(index), this.history[index]);
-				Vue.cookie.set('history'+String(index) + 'type', this.historyType[index]);
+				window.localStorage.setItem('history'+String(index), this.history[index]);
+				window.localStorage.setItem('history'+String(index) + 'type', this.historyType[index]);
 			}
 		}
 	}

@@ -267,7 +267,7 @@ export default {
 }
 
 canvas{
-	width:1000px;
+	width:800px;
 	height:200px;
 	border:5px #f0f0f0 solid;
 	float: left;
