@@ -22,7 +22,7 @@ export function render(eq){
             continue;
         }
         let result = Math.abs(a);
-        if (result > 1000){
+        if (result > 50){
             cx += dx;
             continue;
         }
@@ -39,13 +39,13 @@ export function render(eq){
         x_max = 30;
         system(x_max, max, ctx);
     
-    for (let cx = -x_max; cx < x_max; cx += x_max / 1000){
+    for (let cx = -x_max; cx < x_max; cx += x_max / 5000){
         let e = eq;
         while (e.indexOf('x') != -1){
             e = e.replace(/x/, '(' + String(cx) + ')');
         }
         let cy = calculate(e);
-        if (cy > 1000)
+        if (Math.abs(cy) > 50)
             continue;
         if (cy === false){
             continue;
@@ -86,7 +86,7 @@ function points(pts, ctx){
     ctx.moveTo(pts[0][0], pts[0][1]);
     let last = pts[0][1]
     for (let p of pts){
-        if (Math.abs(p[1] - last) < 100){
+        if (Math.abs(p[1] - last) < 50){
             ctx.lineTo(p[0], p[1]);
         }
         else{

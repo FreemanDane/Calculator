@@ -170,6 +170,9 @@ export default {
 				son:"儿子",
 				daughter:"女儿"
 			};
+			if (sex == "请选择性别"){
+				return;
+			}
 			if (str == '='){
 				let list = kinRelation(self.curr.equation, sex == 'male'? 1 : 0);
 				for ( let l of list){
@@ -191,15 +194,15 @@ export default {
 					self.curr.equation = self.curr.equation.slice(0, self.curr.equation.length - 3);
 				}
 				else{
-					self.curr.equation = 0;
+					self.curr.equation = "";
 				}
 				self.curr.result = "";
 			}
-			else{
+			else if (str != 't'){
 				if (self.curr.equation == ''){
 					self.curr.equation = str;
 				}
-				else{
+				else if (str != ''){
 					self.curr.equation += ('的' + str);
 				}
 			}
@@ -216,7 +219,9 @@ export default {
 					let r = kinRelation(eq, sex == "male"? 1 : 0);
 					bus.$emit('kinbutton', k, r.length != 0)
 				}
-				self.curr.result = "";
+				if (str != 't'){
+					self.curr.result = "";
+				}
 			}
 		})
 	},

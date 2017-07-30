@@ -149,18 +149,22 @@ export default {
 				wife:false,
 				son:false,
 				daughter:false
-			}
+			},
+			clear:true
 		}
 	},
 	mounted() {
 		window.addEventListener('keydown', this.keyboardInput);
 		let self = this;
 		bus.$on("change",function(type){
+			self.clear = false;
 			self.type = type;	
+			setTimeout(()=>self.clear = true, 200);
 		})
 		bus.$on("render", function(eq){
+			self.clear= false;
 			self.type = "canvas";
-			setTimeout(()=>render(eq), 1000);
+			setTimeout(()=>{render(eq), self.clear=true}, 1000);
 		})
 		bus.$on("kinbutton", function(name, value){
 			self.hasFamilyMembers[name] = value;
@@ -181,7 +185,7 @@ export default {
 		keyboardInput(event){
 			var key = event.key;
 			if (this.type == "normal"){
-				var direct = "1234567890!*-+/!^().=";
+				var direct = "1234567890!*-+/!^().=x";
 				if (direct.indexOf(key) != -1){
 					this.getInput(key);
 				}
@@ -239,9 +243,17 @@ export default {
 		},
 		sex: function(val){
 			if (this.type == "kin"){
-				bus.$emit("kinInput", "", this.sex);
+				bus.$emit("kinInput", "t", this.sex);
 			}
 		},
+		type: function(val){
+			if (this.clear){
+				bus.$emit("clear");
+			}
+			if (val == 'kin'){
+				bus.$emit("kinInput", "", this.sex);
+			}
+		}
 	}
 }
 </script>

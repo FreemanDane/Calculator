@@ -8,7 +8,7 @@ export function getRate(from, to){
         return "请选择货币";
     }
     var result = ''
-    let url = 'http://api.k780.com/?app=finance.rate&scur=' + from + '&tcur=' + to + '&appkey=27056&sign=6b49962cb830872b09330d98ed79a1f6&format=json'
+    let url = 'https://sapi.k780.com/?app=finance.rate&scur=' + from + '&tcur=' + to + '&appkey=27056&sign=6b49962cb830872b09330d98ed79a1f6&format=json'
     jsonp(url, {param:'jsoncallback'}, function(err, data){
         let result = "";
         if (err){
